@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Store.js</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+<body>
+
+</body>
+  <script src="./libs/store.everything.min.js"></script>
+  <script>
+  (() => {
+
+    console.log('clear all keys..');
+    store.clearAll();
+
+    store.set('first_sample', {
+      date: '2017 April 1',
+      time: '20:53',
+      comments: "I'm sleepy"
+    });
+    store.set('simple_string', 'test simple string');
+    store.set('save_undefined', undefined);
+    store.set('save_null', null);
+    store.set('save_function', () => console.log('hello world'));
+
+    store.forEach((key, value) => console.log(`${key}: `, value));
+
+    console.log('key1 does not exist nor have a default value: ', store.get('key1'));
+    store.defaults({ key1: 'key1-default-value' });
+    console.log('default value defined: ', store.get('key1'));
+    store.set('key1', 'key1-assigned-value');
+    console.log('value assined: ', store.get('key1'));
+    store.remove('key1');
+    console.log('value removed: ', store.get('key1'));
+
+    console.log('all values: ', store.dump());
+
+    // callback called 3 times each time, only the third newValue and oldValue were not undefined
+    store.watch('watched_key', (newValue, oldValue) => {
+      if (newValue || oldValue) {
+        console.log(`watched value was changed from "${oldValue}" to "${newValue}"`);
+      }
+    });
+    store.set('watched_key', 'value1');
+    store.set('watched_key', 'value2');
+    store.set('watched_key', 'value3');
+
+    // callback called 3 times each time, only the third newValue and oldValue were not undefined
+    store.observe('observed_key', (newValue, oldValue) => {
+      if (newValue || oldValue) {
+        console.log(`observed value was changed from "${oldValue}" to "${newValue}"`);
+      }
+    });
+    store.set('observed_key', 'value1');
+    store.set('observed_key', 'value2');
+    store.set('observed_key', 'value3');
+
+    // expiration time did not work
+    let duration = 1 * 1000; // 2 seconds
+    let expiration = new Date().getTime() + duration;
+    store.set('key2', 'value!!');
+    console.log('value set with expiration time: ', store.get('key2'));
+    setTimeout(() => console.log('value after expiration time has passed: ', store.get('key2')), duration + 1000);
+
+    // Conclusion: untrustable, its behavior changes with the storage used (well... I think so, 
+    // but it definitely changed when I changed the library to the store.everthing.js), the watchers and observer callbacks are called several times
+    // and the expiration timer didn't work
+
+  })();
+  </script>
+</html>
